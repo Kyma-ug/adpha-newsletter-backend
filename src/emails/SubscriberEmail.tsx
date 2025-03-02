@@ -1,6 +1,11 @@
-const { Html, Container, Text, Button } = require("@react-email/components");
+import { Html, Container, Text, Button } from "@react-email/components";
 
-module.exports = ({ firstName, email }) => (
+interface SubscriberEmailProps {
+  firstName: string;
+  email: string;
+}
+
+export const SubscriberEmail = ({ firstName, email }: SubscriberEmailProps) => (
   <Html>
     <Container>
       <Text style={{ fontSize: "16px", color: "#333" }}>

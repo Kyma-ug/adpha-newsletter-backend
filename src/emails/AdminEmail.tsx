@@ -1,6 +1,16 @@
-const { Html, Container, Text } = require("@react-email/components");
+import { Html, Container, Text } from "@react-email/components";
 
-module.exports = ({ formData }) => (
+interface AdminEmailProps {
+  formData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    location?: string;
+    interests: string[];
+  };
+}
+
+export const AdminEmail = ({ formData }: AdminEmailProps) => (
   <Html>
     <Container>
       <Text style={{ fontSize: "16px", color: "#333" }}>
