@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { MongoClient } from "mongodb";
-import { Resend } from "@resend/resend";
+import { Resend } from 'resend';
 import { render } from "@react-email/render";
 import cors from "cors";
 import { SubscriberEmail } from "./emails/SubscriberEmail";
