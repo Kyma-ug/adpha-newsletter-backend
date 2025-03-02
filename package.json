@@ -1,10 +1,10 @@
 {
   "name": "newsletter-backend",
   "version": "1.0.0",
-  "main": "dist/server.js",
+  "main": "server.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node server.js",
     "dev": "ts-node-dev --respawn src/server.ts"
   },
   "dependencies": {
