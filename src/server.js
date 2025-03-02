@@ -13,7 +13,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const mongoUri = process.env.MONGO_URI;
 const client = new MongoClient(mongoUri);
 
-app.use(cors()); // Allow frontend requests from Netlify
+app.use(cors()); // Allow frontend requests
 app.use(express.json());
 
 app.post("/api/subscribe", async (req, res) => {
@@ -36,7 +36,7 @@ app.post("/api/subscribe", async (req, res) => {
 
     // Send emails
     await resend.emails.send({
-      from: "info@adpha-ug.org",
+      from: "info@adpha-ug.org", // Verify this in Resend
       to: "info@adpha-ug.org",
       subject: "New Newsletter Subscription",
       html: adminHtml,
@@ -50,6 +50,7 @@ app.post("/api/subscribe", async (req, res) => {
 
     res.status(200).json({ message: "Subscription successful" });
   } catch (error) {
+    console.error("Error:", error);
     res.status(500).json({ error: "Failed to process subscription" });
   } finally {
     await client.close();
