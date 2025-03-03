@@ -1,19 +1,33 @@
 import express, { Request, Response } from "express";
-import { MongoClient } from "mongodb";
-import { Resend } from 'resend';
-import { render } from "@react-email/render";
+import { MongoClient, Db } from "mongodb";
 import cors from "cors";
-// import { SubscriberEmail } from "./emails/SubscriberEmail";
-// import { AdminEmail } from "./emails/AdminEmail";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
-const resend = new Resend(process.env.RESEND_API_KEY);
-const mongoUri = process.env.MONGO_URI as string;
-const client = new MongoClient(mongoUri);
+const mongoUri = "mongodb+srv://newsletterUser:D*AAt%40vxjnJ5%40Zv@adpha0.di3np.mongodb.net/newsletter?retryWrites=true&w=majority&appName=Adpha0";
+
+const client = new MongoClient(mongoUri, {
+  connectTimeoutMS: 10000,
+  serverSelectionTimeoutMS: 10000,
+});
+
+let db: Db;
+
+async function connectToMongo() {
+  try {
+    await client.connect();
+    db = client.db("newsletter");
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.error("Failed to connect to MongoDB:", error);
+    process.exit(1);
+  }
+}
+
+connectToMongo();
 
 app.use(cors());
 app.use(express.json());
@@ -22,10 +36,11 @@ interface FormData {
   firstName: string;
   lastName: string;
   email: string;
-  location?: string;
+  location: string;
   interests: string[];
 }
 
+// POST: Add a new subscriber
 app.post("/api/subscribe", async (req: Request, res: Response) => {
   const formData: FormData = req.body;
 
@@ -34,33 +49,39 @@ app.post("/api/subscribe", async (req: Request, res: Response) => {
   }
 
   try {
-    await client.connect();
-    const db = client.db("newsletter");
     const subscribers = db.collection("subscribers");
-    await subscribers.insertOne({ ...formData, subscribedAt: new Date() });
-
-    // const subscriberHtml = render(SubscriberEmail({ firstName: formData.firstName, email: formData.email }));
-    // const adminHtml = render(AdminEmail({ formData }));
-
-    await resend.emails.send({
-      from: "markyokuhaire18@gmail.com",
-      to: "markyokuhaire18@gmail.com",
-      subject: "New Newsletter Subscription",
-      html:  '<p>it works!</p>',
+    const result = await subscribers.insertOne({ ...formData, subscribedAt: new Date() });
+    
+    res.status(200).json({ 
+      message: "Subscription successful",
+      insertedId: result.insertedId
     });
-    await resend.emails.send({
-      from: "markyokuhaire18@gmail.com",
-      to: formData.email,
-      subject: "Thanks for Subscribing!",
-      html:  '<p>it works!</p>',
-    });
-
-    res.status(200).json({ message: "Subscription successful" });
   } catch (error) {
+    console.error("Error inserting into MongoDB:", error);
     res.status(500).json({ error: "Failed to process subscription" });
-  } finally {
-    await client.close();
   }
+});
+
+// GET: Retrieve all subscribers
+app.get("/api/subscribers", async (req: Request, res: Response) => {
+  try {
+    const subscribers = db.collection("subscribers");
+    const subscriberList = await subscribers.find({}).toArray();
+    
+    res.status(200).json({
+      message: "Subscribers retrieved successfully",
+      data: subscriberList
+    });
+  } catch (error) {
+    console.error("Error retrieving subscribers:", error);
+    res.status(500).json({ error: "Failed to retrieve subscribers" });
+  }
+});
+
+process.on("SIGTERM", async () => {
+  await client.close();
+  console.log("MongoDB connection closed");
+  process.exit(0);
 });
 
 app.listen(port, () => {
