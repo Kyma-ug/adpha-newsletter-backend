@@ -3,8 +3,8 @@ import { MongoClient } from "mongodb";
 import { Resend } from 'resend';
 import { render } from "@react-email/render";
 import cors from "cors";
-import { SubscriberEmail } from "./emails/SubscriberEmail";
-import { AdminEmail } from "./emails/AdminEmail";
+// import { SubscriberEmail } from "./emails/SubscriberEmail";
+// import { AdminEmail } from "./emails/AdminEmail";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -39,20 +39,20 @@ app.post("/api/subscribe", async (req: Request, res: Response) => {
     const subscribers = db.collection("subscribers");
     await subscribers.insertOne({ ...formData, subscribedAt: new Date() });
 
-    const subscriberHtml = render(SubscriberEmail({ firstName: formData.firstName, email: formData.email }));
-    const adminHtml = render(AdminEmail({ formData }));
+    // const subscriberHtml = render(SubscriberEmail({ firstName: formData.firstName, email: formData.email }));
+    // const adminHtml = render(AdminEmail({ formData }));
 
     await resend.emails.send({
-      from: "info@adpha-ug.org",
-      to: "info@adpha-ug.org",
+      from: "markyokuhaire18@gmail.com",
+      to: "markyokuhaire18@gmail.com",
       subject: "New Newsletter Subscription",
-      html: adminHtml,
+      html:  '<p>it works!</p>',
     });
     await resend.emails.send({
-      from: "info@adpha-ug.org",
+      from: "markyokuhaire18@gmail.com",
       to: formData.email,
       subject: "Thanks for Subscribing!",
-      html: subscriberHtml,
+      html:  '<p>it works!</p>',
     });
 
     res.status(200).json({ message: "Subscription successful" });
